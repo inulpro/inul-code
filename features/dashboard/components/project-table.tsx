@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 import { useState } from "react";
 import { format } from "date-fns";
 import {
@@ -15,7 +16,10 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -31,11 +35,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { Project } from "../types";
 
 interface ProjectTableProps {
   projects: Project[];
+  onUpdateProject?: (id: string, data: EditProjectData) => Promise<void>;
+  onDeleteProject?: (id: string) => Promise<void>;
+  onDuplicateProject?: (id: string) => Promise<{
+    id: string;
+    title: string;
+    description: string | null;
+    template: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
+  } | null>;
 }
 
 interface EditProjectData {
@@ -43,7 +76,12 @@ interface EditProjectData {
   description: string;
 }
 
-export default function ProjectTable({ projects }: ProjectTableProps) {
+export default function ProjectTable({
+  projects,
+  onDeleteProject,
+  onDuplicateProject,
+  onUpdateProject,
+}: ProjectTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -54,20 +92,77 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDuplicateProject = async (project: Project) => {
+    if (!onDuplicateProject) return;
+
     setIsLoading(true);
     try {
+      const result = await onDuplicateProject(project.id);
+      if (result) {
+        toast.success("Project duplicated successfully");
+      } else {
+        toast.error("Failed to duplicate project");
+      }
     } catch (error) {
-      console.error(error);
+      toast.error("Failed to duplicate project");
+      console.error("Error duplicating project:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEditClick = async (project: Project) => {};
+  const handleEditClick = async (project: Project) => {
+    setSelectedProject(project);
+    setEditData({
+      title: project.title,
+      description: project.description || "",
+    });
+    setEditDialogOpen(true);
+  };
 
-  const copyProjectUrl = async (projectId: string) => {};
+  const handleUpdateProject = async () => {
+    if (!selectedProject || !onUpdateProject) return;
 
-  const handleDeleteClick = async (project: Project) => {};
+    setIsLoading(true);
+    try {
+      await onUpdateProject(selectedProject.id, editData);
+      setEditDialogOpen(false);
+      setSelectedProject(null);
+      toast.success("Project updated successfully");
+    } catch (error) {
+      toast.error("Failed to update project");
+      console.error("Error updating project:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const copyProjectUrl = async (projectId: string) => {
+    const url = `${window.location.origin}/playground/${projectId}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Project url copied to clipboard");
+  };
+
+  const handleDeleteClick = async (project: Project) => {
+    setSelectedProject(project);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!selectedProject || !onDeleteProject) return;
+    setIsLoading(true);
+
+    try {
+      await onDeleteProject(selectedProject.id);
+      setDeleteDialogOpen(false);
+      setSelectedProject(null);
+      toast.success("Project deleted Successfully");
+    } catch (error) {
+      toast.error("failed to delete project");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -94,6 +189,9 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
                     >
                       <span className="font-semibold">{project.title}</span>
                     </Link>
+                    <span className="text-sm text-gray-500 line-clamp-1">
+                      {project.description}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -112,13 +210,15 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <Image
                         src={project.user.image || "/placeholder.svg"}
-                        alt={project.user.name}
+                        alt={project.user.name || "User"}
                         width={32}
                         height={32}
                         className="object-cover"
                       />
                     </div>
-                    <span className="text-sm">{project.user.name}</span>
+                    <span className="text-sm">
+                      {project.user.name || "Unknown User"}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -131,7 +231,7 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem asChild>
-                        {/* <MarkedToggleButton markedForRevision={project.Starmark[0]?.isMarked} id={project.id} /> */}
+                        {/* <MarkedToggleButton markedForRevision={project.starmark[0]?.isMarked} id={project.id} /> */}
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link
@@ -161,9 +261,10 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleDuplicateProject(project)}
+                        disabled={isLoading}
                       >
                         <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
+                        {isLoading ? "Duplicating..." : "Duplicate"}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => copyProjectUrl(project.id)}
@@ -187,6 +288,91 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit project</DialogTitle>
+            <DialogDescription>
+              Make changes to your project details here. Click save when you are
+              done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Project title</Label>
+              <Input
+                id="title"
+                value={editData.title}
+                onChange={(e) =>
+                  setEditData((prev) => ({ ...prev, title: e.target.value }))
+                }
+                placeholder="Enter project title"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editData.description}
+                onChange={(e) =>
+                  setEditData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                placeholder="Enter project description"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant={"outline"}
+              onClick={() => setEditDialogOpen(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant={"brand"}
+              onClick={handleUpdateProject}
+            >
+              {isLoading ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-red-400">
+                {selectedProject?.title}?
+              </span>{" "}
+              This action cannot be undone. All files and data associated with
+              this project will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProject}
+              disabled={isLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isLoading ? "Deleting..." : "Delete Project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

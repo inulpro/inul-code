@@ -59,12 +59,10 @@ const DashboardSidebar = ({
   initialPlaygroundData: PlaygroundDataProps[];
 }) => {
   const pathname = usePathname();
-  const [starredPlaygrounds, setStarredPlayground] = useState(
+  const [starredPlaygrounds] = useState(
     initialPlaygroundData.filter((p) => p.starred)
   );
-  const [recentPlaygrounds, setRecentPlaygrounds] = useState(
-    initialPlaygroundData
-  );
+  const [recentPlaygrounds] = useState(initialPlaygroundData);
 
   return (
     <Sidebar variant="inset" collapsible="icon" className="border-1 border-r">
@@ -97,7 +95,7 @@ const DashboardSidebar = ({
                 isActive={pathname === "/dashboard"}
                 tooltip={"Home"}
               >
-                <Link href={"#"}>
+                <Link href={"/dashboard"}>
                   <LayoutDashboard className="size-4" />
                   <span>Dashboard</span>
                 </Link>

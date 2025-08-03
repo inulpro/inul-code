@@ -1,10 +1,15 @@
 import React from "react";
 
 import EmptyState from "@/components/ui/empty-state";
-import { getAllPlaygroundForUser } from "@/features/dashboard/actions";
 import ProjectTable from "@/features/dashboard/components/project-table";
 import AddNewButton from "@/features/dashboard/components/add-new-button";
 import AddRepoButton from "@/features/dashboard/components/add-repo-button";
+import {
+  deleteProjectById,
+  duplicateProjectById,
+  editProjectById,
+  getAllPlaygroundForUser,
+} from "@/features/dashboard/actions";
 
 const Page = async () => {
   const playgrounds = await getAllPlaygroundForUser();
@@ -17,14 +22,19 @@ const Page = async () => {
       </div>
 
       <div className="mt-10 flex flex-col justify-center items-center w-full">
-        {playgrounds && playgrounds.length === 0 ? (
+        {playgrounds.length === 0 ? (
           <EmptyState
             title="No projects Found"
             description="Create a new Project to get started"
             imageSrc="/empty-state.svg"
           />
         ) : (
-          <ProjectTable projects={playgrounds as []} />
+          <ProjectTable
+            projects={playgrounds}
+            onDeleteProject={deleteProjectById}
+            onDuplicateProject={duplicateProjectById}
+            onUpdateProject={editProjectById}
+          />
         )}
       </div>
     </div>
