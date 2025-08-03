@@ -29,7 +29,7 @@ const AddNewButton = () => {
         </div>
       </div>
 
-      <div className="realtive overflow-hidden">
+      <div className="relative overflow-hidden">
         <Image
           src="/add-new.svg"
           alt="Create new Playground"

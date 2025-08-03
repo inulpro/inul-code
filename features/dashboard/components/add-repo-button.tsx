@@ -31,7 +31,7 @@ const AddRepoButton = () => {
         </div>
       </div>
 
-      <div className="realtive overflow-hidden">
+      <div className="relative overflow-hidden">
         <Image
           src="/github.svg"
           alt="Create new Playground"

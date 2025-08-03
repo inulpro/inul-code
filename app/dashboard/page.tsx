@@ -1,14 +1,16 @@
 import React from "react";
 
 import EmptyState from "@/components/ui/empty-state";
+import { getAllPlaygroundForUser } from "@/features/dashboard/actions";
+import ProjectTable from "@/features/dashboard/components/project-table";
 import AddNewButton from "@/features/dashboard/components/add-new-button";
 import AddRepoButton from "@/features/dashboard/components/add-repo-button";
 
-const Page = () => {
-  const playgrounds: [] = [];
+const Page = async () => {
+  const playgrounds = await getAllPlaygroundForUser();
 
   return (
-    <div className="felx flex-col justify-start items-center min-h-screen mx-auto max-w-7xl px-4 py-10">
+    <div className="flex flex-col justify-start items-center min-h-screen mx-auto max-w-7xl px-4 py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         <AddNewButton />
         <AddRepoButton />
@@ -22,8 +24,7 @@ const Page = () => {
             imageSrc="/empty-state.svg"
           />
         ) : (
-          // todo add playground table
-          <p>Playground Table</p>
+          <ProjectTable projects={playgrounds as []} />
         )}
       </div>
     </div>
