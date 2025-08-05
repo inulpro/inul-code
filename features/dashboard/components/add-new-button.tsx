@@ -13,8 +13,8 @@ import { createPlayground } from "../actions";
 import TemplateSelectionModal from "./template-selection-modal";
 
 const AddNewButton = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = async (data: {
     title: string;
@@ -32,11 +32,7 @@ const AddNewButton = () => {
     <>
       <div
         onClick={() => setIsModalOpen(true)}
-        className="group px-6 py-6 flex flex-row justify-between items-center border rounded-lg bg-muted cursor-pointer 
-        transition-all duration-300 ease-in-out
-        hover:bg-background hover:border-[#E93F3F] hover:scale-[1.02]
-        shadow-[0_2px_10px_rgba(0,0,0,0.08)]
-        hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
+        className="group px-6 py-6 flex flex-row justify-between items-center border rounded-lg bg-muted cursor-pointer transition-all duration-300 ease-in-out hover:bg-background hover:border-[#E93F3F] hover:scale-[1.02] shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
       >
         <div className="flex flex-row justify-center items-start gap-4">
           <Button

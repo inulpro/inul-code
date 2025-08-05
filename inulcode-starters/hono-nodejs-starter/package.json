@@ -1,0 +1,21 @@
+{
+  "name": "hono-nodejs-starter",
+  "version": "1.0.0",
+  "description": "Hono.js starter for Node.js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "hono",
+    "nodejs",
+    "api"
+  ],
+  "author": "InulCode",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^3.12.0",
+    "@hono/node-server": "^1.8.0"
+  }
+}

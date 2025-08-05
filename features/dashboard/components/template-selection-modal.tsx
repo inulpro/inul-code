@@ -171,6 +171,7 @@ const TemplateSelectionModal = ({
       setStep("configure");
     }
   };
+
   const renderStars = (count: number) => {
     return Array(5)
       .fill(0)
@@ -217,6 +218,7 @@ const TemplateSelectionModal = ({
   const handleBack = () => {
     setStep("select");
   };
+
   return (
     <Dialog
       open={isOpen}
