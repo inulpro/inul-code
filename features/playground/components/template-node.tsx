@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-
 import {
   ChevronRight,
   File,
   Folder,
-  Plus,
   FilePlus,
   FolderPlus,
   MoreHorizontal,
@@ -12,23 +10,16 @@ import {
   Edit3,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -37,14 +28,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,15 +38,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+
+import { TemplateFile, TemplateFolder } from "../types";
 import {
   NewFileDialog,
   NewFolderDialog,
   RenameFolderDialog,
 } from "./template-file-tree";
-import { TemplateFile, TemplateFolder } from "../types";
 
 // Union type for items in the file system
 type TemplateItem = TemplateFile | TemplateFolder;
@@ -129,16 +110,6 @@ const TemplateNode = ({
 
     const handleDelete = () => {
       setIsDeleteDialogOpen(true);
-    };
-
-    const confirmDelete = () => {
-      onDeleteFile?.(file, path);
-      setIsDeleteDialogOpen(false);
-    };
-
-    const handleRenameSubmit = (newFilename: string, newExtension: string) => {
-      onRenameFile?.(file, newFilename, newExtension, path);
-      setIsRenameDialogOpen(false);
     };
 
     return (

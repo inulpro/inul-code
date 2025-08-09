@@ -1,26 +1,11 @@
 "use client";
 
 import * as React from "react";
-import {
-  ChevronRight,
-  File,
-  Folder,
-  Plus,
-  FilePlus,
-  FolderPlus,
-  MoreHorizontal,
-  Trash2,
-  Edit3,
-} from "lucide-react";
+import { Plus, FilePlus, FolderPlus } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -29,9 +14,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import {
@@ -39,7 +21,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -49,16 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
 import TemplateNode from "./template-node";
 import { TemplateFile, TemplateFolder } from "../types";
 
@@ -111,6 +83,7 @@ const TemplateFileTree = ({
   const handleAddRootFolder = () => {
     setIsNewFolderDialogOpen(true);
   };
+
   return (
     <Sidebar>
       <SidebarContent>

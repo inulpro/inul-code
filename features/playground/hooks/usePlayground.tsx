@@ -43,7 +43,9 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
 
       const res = await fetch(`/api/template/${id}`);
       if (!res.ok) {
-        console.warn(`Template API failed with status ${res.status}, using default template`);
+        console.warn(
+          `Template API failed with status ${res.status}, using default template`
+        );
         // Fallback to default template structure
         setTemplateData({
           folderName: "Root",
@@ -51,14 +53,15 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
             {
               filename: "index",
               fileExtension: "js",
-              content: "// Welcome to InulCode Playground!\nconsole.log('Hello World!');"
+              content:
+                "// Welcome to InulCode Playground!\nconsole.log('Hello World!');",
             },
             {
               filename: "README",
               fileExtension: "md",
-              content: "# InulCode Playground\n\nStart coding here!"
-            }
-          ]
+              content: "# InulCode Playground\n\nStart coding here!",
+            },
+          ],
         });
         toast.success("Default template loaded");
         return;
@@ -75,9 +78,10 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
             {
               filename: "index",
               fileExtension: "js",
-              content: "// Welcome to InulCode Playground!\nconsole.log('Hello World!');"
-            }
-          ]
+              content:
+                "// Welcome to InulCode Playground!\nconsole.log('Hello World!');",
+            },
+          ],
         });
       }
 
