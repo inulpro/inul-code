@@ -1,16 +1,27 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { FileText, Save, X, Settings, Bot } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  FileText,
+  Save,
+  X,
+  Settings,
+  Bot,
+  AlertCircle,
+  FolderOpen,
+} from "lucide-react";
 
 import { TemplateFile } from "@/features/playground/types";
 import { usePlayground } from "@/features/playground/hooks/usePlayground";
 import { useFileExplorer } from "@/features/playground/hooks/useFileExplorer";
+import { useWebContainer } from "@/features/webContainers/hooks/useWebContainer";
 import PlaygroundEditor from "@/features/playground/components/playground-editor";
 import TemplateFileTree from "@/features/playground/components/template-file-tree";
+import WebContainerPreview from "@/features/webContainers/components/webcontainer-preview";
 
 import { Button } from "@/components/ui/button";
+import LoadingStep from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -27,7 +38,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 const Page = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +69,16 @@ const Page = () => {
     setOpenFiles,
   } = useFileExplorer();
 
+  const {
+    serverUrl,
+    isLoading: containerLoading,
+    error: containerError,
+    instance,
+    writeFileSync,
+  } = useWebContainer({ templateData });
+
+  const lastSyncedContent = useRef<Map<string, string>>(new Map());
+
   useEffect(() => {
     setPlaygroundId(id);
   }, [id, setPlaygroundId]);
@@ -71,30 +96,42 @@ const Page = () => {
     console.log("HandlePath", file);
     openFile(file);
   };
-  console.log(openFiles);
 
-  if (isLoading) {
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Loading playground...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
+        <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-semibold text-red-600 mb-2">
+          Something went wrong
+        </h2>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()} variant="destructive">
+          Try Again
+        </Button>
       </div>
     );
   }
 
-  if (error) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Retry
-          </button>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
+        <div className="w-full max-w-md p-6 rounded-lg shadow-sm border">
+          <h2 className="text-xl font-semibold mb-6 text-center">
+            Loading Playground
+          </h2>
+          <div className="mb-8">
+            <LoadingStep
+              currentStep={1}
+              step={1}
+              label="Loading playground data"
+            />
+            <LoadingStep
+              currentStep={2}
+              step={2}
+              label="Setting up environment"
+            />
+            <LoadingStep currentStep={3} step={3} label="Ready to code" />
+          </div>
         </div>
       </div>
     );
@@ -102,10 +139,14 @@ const Page = () => {
 
   if (!templateData) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p>No template data available</p>
-        </div>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
+        <FolderOpen className="h-12 w-12 text-amber-500 mb-4" />
+        <h2 className="text-xl font-semibold text-amber-600 mb-2">
+          No template data available
+        </h2>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Reload Template
+        </Button>
       </div>
     );
   }
@@ -228,7 +269,7 @@ const Page = () => {
                                 <span className="h-2 w-2 rounded-full bg-orange-500" />
                               )}
                               <span
-                                className="ml-2 h-4 w-4 hover:bg-destructive hover:text-destructive-foreground rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                className="ml-2 h-4 w-4 hover:bg-destructive hover:text-foreground rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   closeFile(file.id);
@@ -269,6 +310,22 @@ const Page = () => {
                         }
                       />
                     </ResizablePanel>
+                    {isPreviewVisible && (
+                      <>
+                        <ResizableHandle />
+                        <ResizablePanel defaultSize={50}>
+                          <WebContainerPreview
+                            templateData={templateData}
+                            instance={instance}
+                            writeFileSync={writeFileSync}
+                            isLoading={containerLoading}
+                            error={containerError}
+                            serverUrl={serverUrl!}
+                            forceResetup={false}
+                          />
+                        </ResizablePanel>
+                      </>
+                    )}
                   </ResizablePanelGroup>
                 </div>
               </div>
